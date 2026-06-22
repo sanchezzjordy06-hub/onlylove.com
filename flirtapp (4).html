@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Only Love — Aplicación de Citas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --color-primary: #8A142C;
+    --color-primary-light: #F7E6EA;
+    --color-success: #1D9E75;
+    --color-success-light: #E1F5EE;
+    --color-info: #378ADD;
+    --color-info-light: #E6F1FB;
+    --color-bg: #F5F5F5;
+    --color-surface: #FFFFFF;
+    --color-surface2: #F8F8F8;      
+    --color-border: rgba(0,0,0,0.12);
+    --color-border2: rgba(0,0,0,0.22);
+    --color-text: #1A1A1A;
+    --color-text2: #6B6B6B;
+    --color-text3: #AAAAAA;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--color-bg); min-height: 100vh; display: flex; justify-content: center; }
+  .app { width: 100%; max-width: 430px; background: var(--color-surface); min-height: 100vh; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+  .screen { display: none; flex-direction: column; min-height: 100vh; }
+  .screen.active { display: flex; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 0.5px solid var(--color-border); background: var(--color-surface); position: sticky; top: 0; z-index: 10; }
+  .topbar h2 { font-size: 17px; font-weight: 600; color: var(--color-text); }
+  .body { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
+  .bottomnav { display: flex; border-top: 0.5px solid var(--color-border); background: var(--color-surface); position: sticky; bottom: 0; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border: none; background: none; cursor: pointer; font-size: 10px; color: var(--color-text3); transition: color 0.15s; font-family: var(--font); }
+  .nav-btn i { font-size: 22px; }
+  .nav-btn.active { color: var(--color-primary); }
+  .btn { width: 100%; padding: 13px; border-radius: var(--radius-md); border: none; cursor: pointer; font-size: 15px; font-weight: 600; margin-bottom: 10px; transition: opacity 0.2s, transform 0.1s; font-family: var(--font); }
+  .btn:hover { opacity: 0.88; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-outline { background: none; border: 0.5px solid var(--color-border2); color: var(--color-text); }
+  .btn-ghost { background: none; border: none; color: var(--color-primary); font-size: 14px; cursor: pointer; padding: 8px; font-family: var(--font); }
+  .icon-btn { background: none; border: none; cursor: pointer; padding: 8px; color: var(--color-text2); font-size: 22px; border-radius: var(--radius-sm); display: flex; align-items: center; font-family: var(--font); }
+  .icon-btn:hover { background: var(--color-surface2); }
+  label { font-size: 13px; color: var(--color-text2); margin-bottom: 5px; display: block; font-weight: 500; }
+  input, select, textarea { width: 100%; padding: 11px 13px; border: 0.5px solid var(--color-border2); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-text); font-size: 14px; font-family: var(--font); outline: none; margin-bottom: 13px; transition: border-color 0.2s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(138,20,44,0.12); }
+  textarea { resize: none; height: 82px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip { padding: 7px 15px; border-radius: 20px; border: 0.5px solid var(--color-border2); background: var(--color-surface); color: var(--color-text2); font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: var(--font); }
+  .chip.selected { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .card { background: var(--color-surface); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge-danger { background: var(--color-primary-light); color: #5C0E1F; }
+  .avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .progress-bar { height: 4px; background: var(--color-surface2); border-radius: 2px; margin-bottom: 18px; }
+  .progress-fill { height: 100%; background: var(--color-primary); border-radius: 2px; transition: width 0.3s; }
+  .step-label { font-size: 12px; color: var(--color-text2); margin-bottom: 18px; }
+  .divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: var(--color-text3); font-size: 13px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 0.5px; background: var(--color-border); }
+  .section-title { font-size: 12px; font-weight: 700; color: var(--color-text2); text-transform: uppercase; letter-spacing: 0.6px; margin: 18px 0 10px; }
+  .hero-logo { text-align: center; padding: 60px 0 24px; }
+  .logo-icon { width: 76px; height: 76px; background: var(--color-primary); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .logo-icon i { color: #fff; font-size: 38px; }
+  .hero-logo h1 { font-size: 30px; font-weight: 700; color: var(--color-text); }
+  .hero-logo p { font-size: 14px; color: var(--color-text2); margin-top: 5px; }
+  /* Stories */
+  .story-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; scrollbar-width: none; }
+  .story-row::-webkit-scrollbar { display: none; }
+  .story-bubble { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
+  .story-ring { width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid var(--color-primary); padding: 2px; }
+  .story-ring .inner { width: 100%; height: 100%; border-radius: 50%; background: var(--color-surface2); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .story-name { font-size: 11px; color: var(--color-text2); max-width: 62px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Swipe */
+  .swipe-card { border-radius: var(--radius-xl); overflow: hidden; border: 0.5px solid var(--color-border); margin-bottom: 14px; }
+  .swipe-photo { height: 270px; display: flex; align-items: center; justify-content: center; font-size: 96px; background: var(--color-surface2); }
+  .swipe-info { padding: 14px; }
+  .swipe-actions { display: flex; justify-content: center; gap: 20px; padding: 6px 0 4px; }
+  .action-btn { width: 60px; height: 60px; border-radius: 50%; border: 0.5px solid var(--color-border); background: var(--color-surface); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+  .action-btn:hover { transform: scale(1.1); background: var(--color-surface2); }
+  /* Matches */
+  .match-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .match-tile { border-radius: var(--radius-md); overflow: hidden; border: 0.5px solid var(--color-border); cursor: pointer; }
+  .match-tile-photo { height: 104px; display: flex; align-items: center; justify-content: center; font-size: 46px; background: var(--color-surface2); }
+  .match-tile-name { font-size: 12px; font-weight: 600; padding: 6px 8px; color: var(--color-text); }
+  /* Chat */
+  .chat-list-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--color-border); cursor: pointer; }
+  .chat-bubble { max-width: 74%; padding: 10px 14px; border-radius: 18px; font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
+  .chat-bubble.sent { background: var(--color-primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .chat-bubble.recv { background: var(--color-surface2); color: var(--color-text); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .chat-input-bar { display: flex; gap: 8px; padding: 12px 16px; border-top: 0.5px solid var(--color-border); background: var(--color-surface); position: sticky; bottom: 0; }
+  .chat-input-bar input { margin: 0; flex: 1; }
+  .send-btn { background: var(--color-primary); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 18px; flex-shrink: 0; }
+  /* Perfil */
+  .profile-hero { text-align: center; padding: 24px 0 16px; }
+  .big-avatar { width: 92px; height: 92px; border-radius: 50%; font-size: 46px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; background: var(--color-surface2); }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .stat-box { background: var(--color-surface2); border-radius: var(--radius-sm); padding: 12px; text-align: center; }
+  .stat-box .num { font-size: 22px; font-weight: 700; color: var(--color-text); }
+  .stat-box .lbl { font-size: 11px; color: var(--color-text2); margin-top: 2px; }
+  /* Notificaciones */
+  .notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--color-border); }
+  .notif-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); margin-top: 6px; flex-shrink: 0; }
+  .notif-dot.read { background: var(--color-border2); }
+  /* Filtros */
+  .filter-range { margin-bottom: 16px; }
+  .filter-range label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--color-border2); outline: none; margin-bottom: 0; border: none; padding: 0; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--color-primary); cursor: pointer; }
+  .otp-digit { margin-bottom: 0; padding-left: 0; padding-right: 0; }
+  /* Mapa */
+  .map-placeholder { background: var(--color-surface2); border-radius: var(--radius-lg); height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--color-text2); margin-bottom: 14px; border: 0.5px solid var(--color-border); }
+  .nearby-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 0.5px solid var(--color-border); }
+  /* Premium */
+  .premium-card { border-radius: var(--radius-xl); background: var(--color-primary); color: #fff; padding: 22px; margin-bottom: 16px; text-align: center; }
+  .plan-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .plan-box { border: 0.5px solid var(--color-border2); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+  .plan-box.selected { border-color: var(--color-primary); border-width: 2px; }
+  .plan-box .price { font-size: 24px; font-weight: 700; color: var(--color-text); }
+  .plan-box .period { font-size: 12px; color: var(--color-text2); }
+  /* Settings */
+  .setting-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 0.5px solid var(--color-border); cursor: pointer; }
+  .setting-label { font-size: 15px; color: var(--color-text); }
+  .setting-sub { font-size: 12px; color: var(--color-text2); margin-top: 2px; }
+  .toggle { width: 46px; height: 26px; background: var(--color-border2); border-radius: 13px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .toggle.on { background: var(--color-primary); }
+  .toggle::after { content: ''; width: 22px; height: 22px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .toggle.on::after { left: 22px; }
+  /* Story viewer */
+  .story-viewer { position: fixed; inset: 0; background: #111; z-index: 999; display: none; flex-direction: column; }
+  .story-viewer.show { display: flex; }
+  .story-viewer-top { display: flex; align-items: center; padding: 14px 16px; gap: 10px; }
+  .story-viewer-top button { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+  .story-content { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 120px; }
+  /* Estado vacío */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--color-text2); }
+  .empty-state i { font-size: 56px; color: var(--color-text3); margin-bottom: 16px; display: block; }
+  .empty-state h3 { font-size: 18px; font-weight: 600; color: var(--color-text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+  .recover-icon { text-align: center; padding: 30px 0 16px; color: var(--color-primary); font-size: 58px; }
+  @media (min-width: 600px) {
+    body { align-items: center; padding: 20px; }
+    .app { border-radius: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- MÓDULO 1: SPLASH -->
+<div class="screen active" id="s-splash">
+  <div class="body" style="display:flex;flex-direction:column;justify-content:space-between;min-height:100vh">
+    <div class="hero-logo">
+      <img src="data:image/jpeg;base64,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BQAAAAAAAAQCpVAAAAAAAAAAEKgsAAAAAAAAAAAAEEAUAAAAABZQCAAAAEAAAAFgoAAAAAAAAAAAAAKlAQAAFAAAAAAAAAAAAqCoKgqCoKgqAAAAAAAAAAAAAAEAAEUAAAAAAAACwAAAAIAAAAABZQAAAAAAAAAAAAACpQEAAABQAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAARQAAAAAAAAAACCpQCAAAAAAAAqUAAAAAAAAAAAAAAWCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAEFAAAAAAAAAAASiKAIAAAAAAAAACoKlAAAAAAAAAAAAAAKlAAAAAQFAAAAAAAAAAAAAAAAAAAAAAABABFAAAAAAAAAAAAEKgqUEAAAAAAAAAAAFgoAJQAAAAAAAAAAAAWCpQAAAAAAAAAAAAAAAAAAAAAAAAAAAQsAAAAAAAAAAAABAAAWAAAAAICgAgKAAAWCpQAICgAAAAAAAAAAAAFgqUAABAAUAAAAAAAAAAAAAAAAAAQsAAAAAAAAAAAAABAAAAAAAAACAoAIACgAAAAAAFgoAAAAAAAAAAAAAFgqCpQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAEsP/xAAC/9oADAMBAAIAAwAAACEAAAAgAATzDDAAAAADygAzzzzzziAAAAAAAAAAAAAAAAAAABDDzzzywyDDAAAAACAADCgAAAAAAAAAAAAATgADgAAAAAEETzzzzzAEEEEAAAAAAAAAAAAAAAAAAAEHDzzzywgEAAAAACAAjQgAAAABAAAgAATygAgAAAQAAFzzzzzAAEEEEEAEAAAAAAAAAAAAAAAAAEAADDzzzwgAgAAAAASzzwgAAAAABSAATzAAAAAAAAAFzzzziAAAEEEEEAAAAAAAAAAAAAAAAAAEEAAAADTzzywAEAAAADDADwgAAAATywzyAAgAAAAAAXzzzyAAEEEEEAAAAAAAAAAAAAAAAAAAAAAAAAEEABDzzywgAAgAAAADzwAAADzz3gAAAAAAAAAXzzzyAAAEEAAAAAAAAAAwwwwwwwwwAAAAAAAAAAEEEBDTzzwgEAAAABDzywAADz3ywAAAAAAAEVzzzgAAEEEAAAAAAAQzzzz3333333zzywwAAAAAAAEEEEHTzywEEEAABDzzwgADz3ygAAAAAAEFzzzgAAEEAAAAAAAzzzzz33333333333333wwAAAAAAEEEEHTzywEEAAABTyzwADzzCBAAAAAEFzzzgAAEEAAAAAAz3zz333333333333333333zwwAAAAAAEEEDTzywEEAAACTzygDyEAAAAAAAFTzzgAEEEAAAAARzzz33333BCAAAAABDDD33333320AAAAAAEEEDTzwgEEAABDzzwigAAAAAAAATzzyAAAEAAAAAT3zz32AAAAAAAAAAAAAAABDT3333zwgAAAAAAEFDzzwEEAAABTzywAAAAAAAAFzzyAAAEEAAAATzzz3zgAAAAAAAAAAAAAAAAAADD3333wwAAAAAAAFDzywEAAAADzzwAAAAAAAATzzgAAEEAAAATzz33iAAAAAAAAEEEEUkEEAAAAABD3X330wAAAAAEEDTzwgAAAABADwAAAAAAADzzyAAAEAAAATzzqBgAAAAAAEEE333333ywgAAAAAADTX//APIAAAAAAAA888AAAAAAA8AQAAAABU884ABBBAAAE988uIAAAAABBBAA99999988sMIAAAAAAE0+/wDyAAAAAAAFPPKAAAAABPAAAAAAAPPPAAAAAAAAPPPPvAAAAAQQAANDPPPPPPOPIEIAAAAAAANPvv8AwAAAAEABDzywAAAAADwAAAAAATzzgAAAAAAATzz7yAAAAEEAAAwzzzzzzzzzwwAAAAAAAABDD77+gAAAAAADTzwgAAAABQAAAAgBTzyAAEAAAADzzz6AAAAEEAAhTzzzzzzzzzzzzywgAAAAAAABz7/wAAAAEABDzywAAAAAAAAAAADzzwAAAAAABTzz7gAAAAEBTzzzzzzzzzzzzzzzzywwAAAAAADT7/ywAAAAEADzzwAAAAAAAAAAEXzygAEAAAADzz7AAAAAEEBzzzzzzzzzzzzzzzzzzywAAAAAAADj/wD8AAAACAAU88IAAAAAAAAAAU88gABBAAAE884YAAAABAAU8888884gAAAAw888888sAAAAAAAgA/8A6AAAAgAEPPKAAAAAAAAACFPPAAAQQAAFPPYAAAAAQQBPPPPOMIAAAAAAAAMNPPPPCAAAAABSwAAGIAAAAAAPPLDAAAAAAACAPPPAAAQAAAPPKAAAAFAADHPPPOBhgAAAAAAAAAANPPPLAAAAF2SIBFzgLgAAAAPPPIAAAAAAAAAfPKAAAAAABPPQD/yaQdPPPPPPJGKwAAAAAAAABmJcPPPAAAAEYALY6EPNAAAAAVPPIAAAAAAAABPPKAAAQAABP7UWQuQk/vPPPPOAawAAAADzSAE34RT/ADzygAQxCEDBQB690AAIAFTzygAAAAABABTzygAAEAABT+N4WACGtzzzzzzpWAAAAB5EAAMmIDqrzzzzzzw6YAIoBQzsAAAAFXzygAAAAAATzzzwAAAAAABSgAiAAA3zzzzzzi0oAAAABYAADUgBSsDzzzzzzyAosAAB72gAAAAFHzzygAAAABTzTzwgAAAAABbIeYAAA/jbz/zzRsA4A4EDYMA0UawMU3zjX3bzyIMoAB8zyAAAAAEHzzygAAAABTxzzygAAAAAAtoIEABwTX12vS/SDekPQMBDCxKHIBCYDyo/k+y+YDC1uiNAAAAAAEHzywwAAAABDDzzygAAAAABSpaMANpcf4tHt2JmQCwIIAAA8gABhWQxJXxvSU3IAA5wISgAAAAAEXzyygAAAAAAATzygAAAAACwsKocKFN18W4oodEO8puAAETsAABUoNpGKW7kxwAAydIgCgAAAAAFXzzwwAAAAADzDzygAAAAACA8JxCATx6qgzpmJ4EWjNkCYeElGmowkG/V/wAJQ0dfjACAEgAAAAABU88goAAAAAAAA88sAAAAAAAajAAAAAQ888888sTxiAAAAAAChAAAAAU88888qAAAAAE9AAAAAABc88AAAAAAAAMc88sAAAAAAA0MAAAAAA08884m2AAAAAAAAAAAAIAAE888888AAAAAAU4AAAAABB888oBAAAAAA08888ABABAAAU+MAAAAAQ886cCrgAAAAAAAAAEIAAc888888oAAAIAAAoAAABBBB888AAAAAAAAU8888oAAAAAAA8+IAAAAAU8Ey6JMAAAAAAAAQ88888888884AAAAAAAUAAAAABBF888cAAAAAAAU8888oAAAAAAA08+AAAAAA8e8c88888sMMIAE8888888888gAAAAAAAYAAAAABBU888ggAAAAAAA08888BAAAAAAA8+AAIAAAQ88888888888888888888888gAAAAAAAEgAAAABBB8880IAAAAAAAAQ8088IAAAAAAAU8AAAAAAAQ888888888888888888888gAAAAAAAAYAAAABBBU8888AAAAUAAAAQwg88sAAAAAAAA8AAAAAAAAA0888888888888888884gAAAAAAAAUAAAAABBBc8888gAAA0AAAAAUIU88IAAAAAAAQoAAAAAAAAA0888888888888888wAAAAAAAAAEwAAAAABBE88894AAAA8AAAAAAQQ88sAAAAAAAAUIAAAAAAAAAAw88888888888wBAAAAAAAAAAYAAAAAABBc8889gAAAQ8AAAAAAAM888IBAAAAAAA0IAAAAAAAAAABQwww88wxxBBAAAAAAAAAAYAAAAAABBE88889AAAAAUAAAAAAAU8888BBAAAAAAAwIAAAAAAAAAAABBBBBBBBAAAAAAAAAAAYAAAAAABBB88888gAAAAA8AAAAAAA08888sBBAAAAAAA0IAAAAAAAAAAAAABBBAAAAAAAAAAAEYAAAAAAABBc888cAAAAAsA8oAAAAAAA08888IBAAAAAAAAQ9tAAAAAAAAAAAAAAAAAAgAAAAAEwAAAAAAAABE8888gAAAAAAAU8AAAAAAAAc8888IAAAAAAAAAQ89tMAAAABBBBAABBBBAAAAAEYgAAAAAAAABF88888AAAAAgAAo8sAAAAAAAA0c888IAAAAAAAAAAQ09tAAAAAABBBBBAAAAAMYwAAAAAAAAAAE888884EgAAAAAYA88IAAAAAAA088888IAABBAAAAAAAQw99IAAAAAAAAAAEMYAAAAAAAAAAABF8888gwAoAoAAAEgA88sAAAAAAAQw88888IBBBAAAAAAAAAAQw8MMMMMMM8wwAAAAAAAAAABBBE88888gAAQIAAAA4AA888oAAAAAAAAQ88888IBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBE88888AAAAAAMIA8AAA0wgQIAAAAAAAAAQ8888sAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBc8888wwAAAAAQwA8gAAAAAAwwMIAAAAAAAQU48888IAAAABAAAAAAAAAAAAAAAAAAAAAAAABBE8888gAAAAAAAEMIEgAAAAAAAAAQsAAgAAAAAAAE8888sIAAAAAAAAAAAAAAAAAAAAAAAAAAAEc88884AAAAAAAc88s4AAACAACAAAAkIACAAAAAAAAw88888sIAABBAAAAAAAAAAAAAAAAAAAEc8888wwgAAAAAAc8884AAAACAACCAAAAU888sAAAAAAAAU08888sMIAAAAAAAAAAAAAAAAAAE888888sAAAAAAAAc8884AAAAAAU/8QAAv/aAAwDAQACAAMAAAAQc8880888cwwwAAAAcAU8wM88884gAAAAAAAAAAAAAAAAAAAQw88MMc4cMMsAAAAgAAgc888c88A88888884AA4AAAA8994M88880BBBBAAAAAAAAAAAAAAAAAAABBw8888c098sIAAAgAI08888884880884coAIAAAA889kc8888IBBBBBABAMc888888sMMIAAAABAAk4888s8808IAAAEs8s88888o8oc84cwAAAAAE889k8884gAABBBBNc888888888888888sMBNAAwws8888Y898MAAAwwAs0888o4AQwcgAIAAAEw85M888gABBBBFc888888888888888888888sIABB00Y8888088EAAAAA8s8888IA9QAAAAAAEgc5c888gAABBEc88888888wwwwwwwww88888888MIBBR88088s098IAAAQ88Y888sJAsAAAAAEod58884AABBNM88888840M8899999998sMYw888888MBBBxl0888999IAAQ8880888hcoAAAAA899k884AABBEc888880Mc8899999999999999M488888sJBBBl088Y998AAAU8so88sUwgQAAAc99k884AABBE88888wd889999999999999999998sw88888INBVs088Y99sAAAk8sc8MhAAAAAU09s884IBBBE88884k8899999wQgAAAAAQww9999999d888888JB9A088899oAAQ88s0AAAAAAA4U4c888AABE88884N8899gAAAAAAAAAAAAAAAQ099998s08888Y899888s998AAAU88QAAAAAAcA9888kgABF88884c88984AAAAAAAAAAAAAAAAAAAw9999sw8888c889Y88Y98sAAA88wAAAAAA8MY8848oBBc8888c8994gAAAAAEM999951tNIAAAAAQ9199tw88888t98088888AAAQA8AAAAAU88c88gAABc8888886gYAAAAAM999xBBBBBAQ08MAAAAA01//v0888sEQwA88o88oAAAA8AQAAAc9o884ABBF8884d88uIAAAAM99988BBBBBBAAQw08MAAAAE0+/wD9PPPGAAHHPPHPPAAABOAAAAEPPFPPAAAAHPPPFPPPvAAAAHffPPCMAAAAAABAHLHPPLAAAANPvv6PPPLAQFMPPOPPKAAAPAAAAHPOPPOAAABPPPPPPPvIAAAHffPPMNDPPPPPPPDOPPPPPLAAAEMPvv3PPPKAFFPPPNPPAAAFAAAANPLPPIAAQPPPPFPPPoAAAHffPNKHPPPPPPPPPPPDENPPPLAAAAHPv7PPPPAVPOPPGPPAAAAAAAAPPFPPAAABPPPKPPPuAAAHPfKABPPPPPPPPPPPPPPPGMPPPLAAANPv/GPPPKAUPPPLPPKAAAAAAFPefPLKAQFPPPFPPsAAABPffIBPPPPPPPPPPPPPPPPPGPPPPCAAAOP/AOzzzzgJDxzzzTygAAAAABzyzzyAwEHzzzjzzhgAABz3zyzzzzzzziAAAADDzzzzzxDzzywAACAD/wDU888G88w88c88AAAgAA80888Q8BR888s89gAAAE9984c8884wgAAAAAAAAw0888s0888IAAPAAANc88oM8s884w8AAAAAU08U88coBU888U8oAAAAI88ww8884CLAAAAAAAAAAA0888Y888oHvLuEu5aT8o88888oc8AAAAAU89c8ssoUU884c9AGqp3GMMIU888gfFgEc888sIE+QT388s8888ReAGy6Qfk8s889c8sc8oAAgAU848888oB8884/tB/YPzp/8A8884dOgE888/z181lZwS888U84wecI0eAefL88W8dU88U8oAAAAE8o88888B888o/vELWNyR880888updA8889v88+x+gm7888IMMMnIsOAAR1G88c89988U8oAAAAQAA88U888888olxjW88FU88U888id8c888wc88yX4M8o888o888cxXoAASIU88889588AUoAAAAAAI88c888888q3G+U88a9y81184W978/08V+8zKz4v8l888s789OCFoAZeoc88889p88AUoAAAAAAg888888888nEV+U83uZPeU/vodxM7of894AS8s8k5Z8/f8i3uYQTlMLjE888889p88QwAAAAAEMA888888888jpQiUuupN2i97eUn35fUs888YM88yidJVi5P3UNVoAALCE8888089t88QUIAAAAU84888888888yDChXO41g3g53XCo67f07921W888rf0LoDiGfn48tR+pIAU888c89988AwoAAAAUAMU88888088rCNSJZAzNqo/jYN4WLat0itqA4s3Vp+EdXe8cUnZPdADgEc888889888cUoAAAAU88U8s888c888SChAAAEs8Mcsc8pEBe88888sfM88AAAU888sM3c84AAE9888s889c8o88AAAAAQwgU8s8888888cMAAAAAAc8884whNoQ088888884oAAE888884888gAAUs888889988oU9AAAIAAIAQ880989888o+MAAAAAs88+XZpAAAAw088880IAAc888888U888IAAAU888199988o88AAAIAAgAA8888888888U+IAAAA088K8BZMAAAAAAAAQ8888888888kw0soAAAQ88884BVt88AgoAAAgAAAAA08o8408888I8+AAAAQ80t+988888sMMIAE8888888884AA08AAAAM88888BVU88AcIAAAAAAAIAQ8898U888880+AAIAA8s08888888888888888888884YAAEAAAAAc8888pB988oI0AAAAAAAAsAI88Y488888848AAAAAQ0s088888888888888888884YAAAIAAAAE88885BF888AA8AAAUAAAAEMcU8s888888880AAAAAAQ084888888888888888888YgAAAAAAAQ888885Bdc88IAIAAA0AAAAAo0488c8880888sgAAAAAAAQ0Y088888888888884s8gAAYAAAAEM88888BVs888pEAAAA8AAAAAUss08s088888884IAAAAAAAQ0880888888888ws98sAEYAAAAAE888884Bdc88MBIAAAQ8AAAAAQ8wQ88c98888888YIAAAAAAAAQ89sM88ww8tN998888wAAAAAE888888p9s88wwBgAAAAUAAAAAAUoAU88198888888cIAAAAAAAAU889999999988888gAAAAAE888888995884AAIAAAAA4AAAAAAQIAA088998888888YIAAAAAAAAQw088999884AAAAAAAAEE888888899888Ag8AAAAsA8gAAAAAAUIAQ88Y988s88888s1tAAAAAAAAAwwww088gAgAAAAAAM888888889k88oAcgAAAAAAAwAAAAAAA0gAU888888888888sA1tMAAAABBBBAABBBBAAAAAEUc888888889988wAA4AAAAgAA0QEAAAAAAA8Ig08888888888888sY1tAAAAAABBBBBAAAAAMUM88888888888884AAEAEAAAAAM8wAIAAAAAAQIAQ088888998888888scx9IAAAAAAAAAAEIE8888888888899884AcMgAAAAAAEc80AEAAAAAAAAMAU88889998888888888scwAMMMMMIwsM88888888889998888gAc4AAQAAAAk88UoAgAAAAAAA0sAQ08849999888888888888888888888888888899999k884gA84AAAAMIAw888IMcsIAAAAAAA08sA0888088888888888888888888888888888889998884gMM4AAAAQwA4c888888MMMIAAAAAA0soE08884080898888888888888888888888889908884c884AAAAEMIEc888g888888sAAgAAAAQ884w888s4E8880M888888888888888888c880c888gE88gAAAAc88sk888+o8+8888IIACAAAAAQ88MA0888s4AABR0804w0088888888888w0c8884MMc8gAAAAc888k8888+A8++88884088sAAAAA088oY0888sMIQ8AAAQ88888888g88ok8888wgQ884AAAAAc888k8884AAU/8QAKhEAAgIABQIFBQEBAAAAAAAAAQIAERASITFBAzIgIjBAURNQYGFxoGL/2gAIAQIBAT8A/wBL1j7mSBAwOx9qTQuAM5hRl1BiNmwLkmln02O5nmQwGx9gJAmcntEysd2mT/oyyu5sei7ZjQirQ9IkCZie0Sn+RFa9D6HU7YnaMGGVgRHa6AiqAMOp2mdPt9+zgRVLamaCZ1gIMftMGw8btQqdNefEWA3mY8KcWYAQAubO0GCakn0OoLWdM+XDqDyzpizePUOgEQUo9878CIl6mM1aCBfnA6MDCCfGSAIoLN4mbKIq8nfEmhNXaAUMHNnKIooegRYMQ0xGDCwREXKMe9vfO1CIuYxjlERa1O+L7r/fQdsxoRRQ8T6uPA7WaiLQwLE6LFUD0nFGxAbHg6jcRFoe9Jqas0UUIPMxPA8Hc/8AMAQecMy/OPUahU6a84Zh84EgY9QGwwimxg7UIi2bhIE8zfoQADxgg42IRYikq1HFmyiIuY2ffdU6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" alt="Only Love" style="max-width:260px;width:80%;margin:0 auto 6px;display:block">
+      <p>Encuentra tu persona especial</p>
+    </div>
+    <div style="padding-bottom:40px">
+      <div style="text-align:center;margin-bottom:36px">
+        <p style="font-size:15px;color:var(--color-text2);line-height:1.7">Conoce personas reales cerca de ti.</p>
+      </div>
+      <button class="btn btn-primary" onclick="go('s-login')">Iniciar sesión</button>
+      <button class="btn btn-outline" onclick="go('s-register')">Crear cuenta nueva</button>
+      <p style="text-align:center;font-size:12px;color:var(--color-text3);margin-top:10px">Al continuar aceptas nuestros <span style="color:var(--color-primary);cursor:pointer">Términos</span> y <span style="color:var(--color-primary);cursor:pointer">Privacidad</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO 2: LOGIN -->
+<div class="screen" id="s-login">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-splash')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Iniciar sesión</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div style="text-align:center;padding:20px 0 24px"><i class="ti ti-flame" style="font-size:52px;color:var(--color-primary)"></i></div>
+    <label>Correo electrónico</label>
+    <input type="email" id="login-email" placeholder="tu@correo.com">
+    <label>Contraseña</label>
+    <input type="password" id="login-pass" placeholder="••••••••">
+    <div style="text-align:right;margin-top:-8px;margin-bottom:16px">
+      <button class="btn-ghost" onclick="go('s-recover')">¿Olvidaste tu contraseña?</button>
+    </div>
+    <button class="btn btn-primary" onclick="go('s-home')">Entrar</button>
+    <div class="divider">o continúa con</div>
+    <button class="btn btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px"><i class="ti ti-brand-google"></i> Google</button>
+    <button class="btn btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px"><i class="ti ti-brand-apple"></i> Apple</button>
+    <p style="text-align:center;font-size:14px;color:var(--color-text2);margin-top:8px">¿No tienes cuenta? <button class="btn-ghost" style="padding:0" onclick="go('s-register')">Regístrate</button></p>
+  </div>
+</div>
+
+<!-- MÓDULO 3: REGISTRO PASO 1 -->
+<div class="screen" id="s-register">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-splash')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Crear cuenta</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:14%"></div></div>
+    <p class="step-label">Paso 1 de 7 — Datos de acceso</p>
+    <label>Nombre completo</label>
+    <input type="text" placeholder="Tu nombre completo">
+    <label>Correo electrónico</label>
+    <input type="email" placeholder="tu@correo.com">
+    <label>Contraseña</label>
+    <input type="password" placeholder="Mínimo 8 caracteres">
+    <label>Confirmar contraseña</label>
+    <input type="password" placeholder="Repite tu contraseña">
+    <label>Número de teléfono</label>
+    <input type="tel" placeholder="+593 99 000 0000">
+    <button class="btn btn-primary" onclick="goToVerifyEmail()">Continuar</button>
+    <p style="text-align:center;font-size:14px;color:var(--color-text2)">¿Ya tienes cuenta? <button class="btn-ghost" style="padding:0" onclick="go('s-login')">Inicia sesión</button></p>
+  </div>
+</div>
+
+<!-- MÓDULO 3.5: VERIFICACIÓN DE CORREO ELECTRÓNICO -->
+<div class="screen" id="s-verify-email">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-register')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Verifica tu correo</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+    <p class="step-label">Paso 1 de 7 — Confirma tu correo</p>
+    <div class="recover-icon"><i class="ti ti-mail"></i></div>
+    <p style="text-align:center;font-size:15px;color:var(--color-text2);margin-bottom:6px;line-height:1.7">
+      Hemos enviado un código de 6 dígitos a:
+    </p>
+    <p id="verify-email-target" style="text-align:center;font-size:15px;font-weight:700;color:var(--color-text);margin-bottom:22px">tu@correo.com</p>
+
+    <label>Código de verificación</label>
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+      <input type="text" inputmode="numeric" maxlength="1" class="otp-digit" style="text-align:center;font-size:18px;padding:11px 0">
+    </div>
+    <p id="verify-email-error" style="display:none;color:var(--color-primary);font-size:13px;margin-bottom:10px">Código incorrecto. Inténtalo de nuevo.</p>
+
+    <button class="btn btn-primary" onclick="confirmEmailCode()">Verificar correo</button>
+    <button class="btn btn-outline" onclick="resendEmailCode()">Reenviar código</button>
+    <p id="verify-resend-msg" style="display:none;text-align:center;font-size:13px;color:var(--color-success);margin-top:6px">Hemos reenviado el código a tu correo.</p>
+
+    <div id="verify-ok" style="display:none;margin-top:16px;padding:16px;background:var(--color-success-light);border-radius:var(--radius-md);text-align:center">
+      <i class="ti ti-circle-check" style="font-size:26px;color:var(--color-success)"></i>
+      <p style="font-size:14px;color:#085041;margin-top:6px">¡Correo verificado correctamente!</p>
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO 4: RECUPERAR CONTRASEÑA -->
+<div class="screen" id="s-recover">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-login')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Recuperar contraseña</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="recover-icon"><i class="ti ti-lock-open"></i></div>
+    <p style="text-align:center;font-size:15px;color:var(--color-text2);margin-bottom:24px;line-height:1.7">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+    <label>Correo electrónico registrado</label>
+    <input type="email" placeholder="tu@correo.com">
+    <button class="btn btn-primary" onclick="showRecoverSuccess()">Enviar enlace de recuperación</button>
+    <button class="btn btn-outline" onclick="go('s-login')">Volver al inicio de sesión</button>
+    <div id="recover-ok" style="display:none;margin-top:16px;padding:16px;background:var(--color-success-light);border-radius:var(--radius-md);text-align:center">
+      <i class="ti ti-circle-check" style="font-size:26px;color:var(--color-success)"></i>
+      <p style="font-size:14px;color:#085041;margin-top:6px">¡Listo! Revisa tu bandeja de entrada.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO 5: INFO PERSONAL -->
+<div class="screen" id="s-reg-personal">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-register')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Información personal</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
+    <p class="step-label">Paso 2 de 7 — Cuéntanos sobre ti</p>
+    <label>Fecha de nacimiento</label>
+    <input type="date">
+    <label>Género</label>
+    <select><option>Hombre</option><option>Mujer</option><option>No binario</option><option>Prefiero no decirlo</option></select>
+    <label>Me interesa conocer</label>
+    <select><option>Mujeres</option><option>Hombres</option><option>Ambos</option><option>Todos</option></select>
+    <label>Ciudad</label>
+    <input type="text" placeholder="Ej: Guayaquil">
+    <label>País</label>
+    <input type="text" placeholder="Ecuador">
+    <label>Foto de perfil</label>
+    <div style="border:2px dashed var(--color-border2);border-radius:var(--radius-lg);padding:28px;text-align:center;margin-bottom:14px;cursor:pointer;color:var(--color-text2)" onclick="document.getElementById('foto-input').click()">
+      <i class="ti ti-camera" style="font-size:30px"></i>
+      <p style="font-size:13px;margin-top:8px">Toca para subir tu foto</p>
+      <input type="file" id="foto-input" accept="image/*" style="display:none">
+    </div>
+    <button class="btn btn-primary" onclick="go('s-reg-academica')">Continuar</button>
+  </div>
+</div>
+
+<!-- MÓDULO 6: FORMACIÓN ACADÉMICA -->
+<div class="screen" id="s-reg-academica">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-reg-personal')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Formación académica</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:42%"></div></div>
+    <p class="step-label">Paso 3 de 7 — Tu educación</p>
+    <label>Nivel de estudios</label>
+    <select><option>Secundaria completa</option><option>Técnico / Tecnólogo</option><option>Universitario</option><option>Maestría</option><option>Doctorado</option><option>Otro</option></select>
+    <label>Institución educativa</label>
+    <input type="text" placeholder="Universidad o colegio">
+    <label>Carrera o especialidad</label>
+    <input type="text" placeholder="Ej: Ingeniería de Software">
+    <label>Año de graduación</label>
+    <input type="number" placeholder="2024" min="1990" max="2030">
+    <label>Idiomas que hablas</label>
+    <div class="chip-group">
+      <span class="chip selected" onclick="toggleChip(this)">Español</span>
+      <span class="chip" onclick="toggleChip(this)">Inglés</span>
+      <span class="chip" onclick="toggleChip(this)">Portugués</span>
+      <span class="chip" onclick="toggleChip(this)">Francés</span>
+      <span class="chip" onclick="toggleChip(this)">Alemán</span>
+      <span class="chip" onclick="toggleChip(this)">Otro</span>
+    </div>
+    <button class="btn btn-primary" onclick="go('s-reg-ocupacion')">Continuar</button>
+  </div>
+</div>
+
+<!-- MÓDULO 7: OCUPACIÓN -->
+<div class="screen" id="s-reg-ocupacion">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-reg-academica')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Tu ocupación</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:56%"></div></div>
+    <p class="step-label">Paso 4 de 7 — ¿A qué te dedicas?</p>
+    <label>Situación laboral</label>
+    <select><option>Empleado/a</option><option>Emprendedor/a</option><option>Freelancer</option><option>Estudiante</option><option>Buscando empleo</option><option>Prefiero no decirlo</option></select>
+    <label>Profesión o cargo</label>
+    <input type="text" placeholder="Ej: Desarrollador/a web">
+    <label>Empresa (opcional)</label>
+    <input type="text" placeholder="Nombre de la empresa">
+    <label>Industria</label>
+    <select><option>Tecnología</option><option>Salud</option><option>Educación</option><option>Finanzas</option><option>Arte / Diseño</option><option>Ventas</option><option>Otra</option></select>
+    <label>Ingresos mensuales</label>
+    <select><option>Prefiero no decirlo</option><option>Menos de $500</option><option>$500 - $1,000</option><option>$1,000 - $2,500</option><option>$2,500 - $5,000</option><option>Más de $5,000</option></select>
+    <button class="btn btn-primary" onclick="go('s-reg-gustos')">Continuar</button>
+  </div>
+</div>
+
+<!-- MÓDULO 8: GUSTOS PERSONALES -->
+<div class="screen" id="s-reg-gustos">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-reg-ocupacion')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Gustos personales</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+    <p class="step-label">Paso 5 de 7 — ¿Qué te apasiona?</p>
+    <label>Hobbies e intereses</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Música</span>
+      <span class="chip" onclick="toggleChip(this)">Viajes</span>
+      <span class="chip" onclick="toggleChip(this)">Deporte</span>
+      <span class="chip" onclick="toggleChip(this)">Cocina</span>
+      <span class="chip" onclick="toggleChip(this)">Arte</span>
+      <span class="chip" onclick="toggleChip(this)">Cine</span>
+      <span class="chip" onclick="toggleChip(this)">Gaming</span>
+      <span class="chip" onclick="toggleChip(this)">Lectura</span>
+      <span class="chip" onclick="toggleChip(this)">Fotografía</span>
+      <span class="chip" onclick="toggleChip(this)">Yoga</span>
+      <span class="chip" onclick="toggleChip(this)">Naturaleza</span>
+      <span class="chip" onclick="toggleChip(this)">Tecnología</span>
+      <span class="chip" onclick="toggleChip(this)">Baile</span>
+    </div>
+    <label>Género musical favorito</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Pop</span>
+      <span class="chip" onclick="toggleChip(this)">Rock</span>
+      <span class="chip" onclick="toggleChip(this)">Reggaetón</span>
+      <span class="chip" onclick="toggleChip(this)">Electrónica</span>
+      <span class="chip" onclick="toggleChip(this)">Clásica</span>
+      <span class="chip" onclick="toggleChip(this)">Jazz</span>
+      <span class="chip" onclick="toggleChip(this)">Salsa</span>
+    </div>
+    <label>¿Tienes mascotas?</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Sí, perro</span>
+      <span class="chip" onclick="toggleChip(this)">Sí, gato</span>
+      <span class="chip" onclick="toggleChip(this)">Otra mascota</span>
+      <span class="chip" onclick="toggleChip(this)">No tengo</span>
+    </div>
+    <label>Descripción para tu perfil</label>
+    <textarea placeholder="Escribe algo sobre ti..."></textarea>
+    <button class="btn btn-primary" onclick="go('s-reg-sentimental')">Continuar</button>
+  </div>
+</div>
+
+<!-- MÓDULO 9: GUSTOS SENTIMENTALES -->
+<div class="screen" id="s-reg-sentimental">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-reg-gustos')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Gustos sentimentales</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+    <p class="step-label">Paso 6 de 7 — Lo que buscas</p>
+    <label>¿Qué tipo de relación buscas?</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Relación seria</span>
+      <span class="chip" onclick="toggleChip(this)">Amistad</span>
+      <span class="chip" onclick="toggleChip(this)">Algo casual</span>
+      <span class="chip" onclick="toggleChip(this)">No lo sé aún</span>
+    </div>
+    <label>Valores importantes para ti</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Honestidad</span>
+      <span class="chip" onclick="toggleChip(this)">Lealtad</span>
+      <span class="chip" onclick="toggleChip(this)">Humor</span>
+      <span class="chip" onclick="toggleChip(this)">Ambición</span>
+      <span class="chip" onclick="toggleChip(this)">Familia</span>
+      <span class="chip" onclick="toggleChip(this)">Independencia</span>
+      <span class="chip" onclick="toggleChip(this)">Espiritualidad</span>
+    </div>
+    <label>¿Quieres tener hijos?</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Sí</span>
+      <span class="chip" onclick="toggleChip(this)">Ya los tengo</span>
+      <span class="chip" onclick="toggleChip(this)">No</span>
+      <span class="chip" onclick="toggleChip(this)">Quizás</span>
+    </div>
+    <label>Situación sentimental actual</label>
+    <select><option>Soltero/a</option><option>Divorciado/a</option><option>Viudo/a</option><option>Separado/a</option></select>
+    <label>¿Con qué frecuencia te gustaría salir?</label>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Todos los días</span>
+      <span class="chip" onclick="toggleChip(this)">Fines de semana</span>
+      <span class="chip" onclick="toggleChip(this)">Cuando se pueda</span>
+      <span class="chip" onclick="toggleChip(this)">Prefiero virtual</span>
+    </div>
+    <button class="btn btn-primary" onclick="go('s-home')">¡Finalizar y comenzar! 🎉</button>
+  </div>
+</div>
+
+<!-- MÓDULO 10: HOME / SWIPE -->
+<div class="screen" id="s-home">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-notifications')"><i class="ti ti-bell"></i></button>
+    <h2>Only Love</h2>
+    <button class="icon-btn" onclick="go('s-filters')"><i class="ti ti-adjustments-horizontal"></i></button>
+  </div>
+  <div class="body" style="padding-top:10px">
+    <!-- Stories: se llenarán desde tu base de datos -->
+    <div class="story-row" id="story-row">
+      <div class="empty-state" style="padding:10px 0;width:100%">
+        <p style="font-size:13px;color:var(--color-text3)">Las historias de otros usuarios aparecerán aquí</p>
+      </div>
+    </div>
+    <!-- Tarjetas swipe: se llenarán desde tu base de datos -->
+    <div id="swipe-cards">
+      <div class="empty-state">
+        <i class="ti ti-users"></i>
+        <h3>Sin perfiles por ahora</h3>
+        <p>Cuando otros usuarios se registren,<br>sus perfiles aparecerán aquí.</p>
+      </div>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn active" onclick="navTo('s-home',this)"><i class="ti ti-flame"></i><span>Inicio</span></button>
+    <button class="nav-btn" onclick="navTo('s-matches',this)"><i class="ti ti-heart"></i><span>Matches</span></button>
+    <button class="nav-btn" onclick="navTo('s-chat',this)"><i class="ti ti-message-circle"></i><span>Mensajes</span></button>
+    <button class="nav-btn" onclick="navTo('s-map',this)"><i class="ti ti-map"></i><span>Mapa</span></button>
+    <button class="nav-btn" onclick="navTo('s-profile',this)"><i class="ti ti-user"></i><span>Perfil</span></button>
+  </div>
+</div>
+
+<!-- MÓDULO 11: MATCHES -->
+<div class="screen" id="s-matches">
+  <div class="topbar"><div style="width:40px"></div><h2>Mis matches</h2><div style="width:40px"></div></div>
+  <div class="body">
+    <p class="section-title">Nuevos matches</p>
+    <div class="match-grid" id="matches-grid">
+      <!-- Se llenará desde tu base de datos -->
+    </div>
+    <div class="empty-state" id="matches-empty">
+      <i class="ti ti-heart"></i>
+      <h3>Aún no tienes matches</h3>
+      <p>Cuando alguien también te dé like,<br>aparecerá aquí.</p>
+    </div>
+    <p class="section-title">Conversaciones</p>
+    <div id="chats-list">
+      <!-- Se llenará desde tu base de datos -->
+    </div>
+    <div class="empty-state" id="chats-empty" style="padding:30px 20px">
+      <i class="ti ti-message-circle"></i>
+      <h3>Sin conversaciones</h3>
+      <p>Cuando tengas un match y empiecen a hablar, aparecerá aquí.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="navTo('s-home',this)"><i class="ti ti-flame"></i><span>Inicio</span></button>
+    <button class="nav-btn active" onclick="navTo('s-matches',this)"><i class="ti ti-heart"></i><span>Matches</span></button>
+    <button class="nav-btn" onclick="navTo('s-chat',this)"><i class="ti ti-message-circle"></i><span>Mensajes</span></button>
+    <button class="nav-btn" onclick="navTo('s-map',this)"><i class="ti ti-map"></i><span>Mapa</span></button>
+    <button class="nav-btn" onclick="navTo('s-profile',this)"><i class="ti ti-user"></i><span>Perfil</span></button>
+  </div>
+</div>
+
+<!-- MÓDULO 12: LISTA DE CHATS -->
+<div class="screen" id="s-chat">
+  <div class="topbar">
+    <div style="width:40px"></div>
+    <h2>Mensajes</h2>
+    <button class="icon-btn"><i class="ti ti-search"></i></button>
+  </div>
+  <div class="body">
+    <input type="text" placeholder="Buscar conversación...">
+    <div id="chat-list-container">
+      <!-- Se llenará desde tu base de datos -->
+    </div>
+    <div class="empty-state" id="chat-list-empty">
+      <i class="ti ti-message-circle"></i>
+      <h3>Sin mensajes aún</h3>
+      <p>Haz match con alguien y empieza<br>una conversación.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="navTo('s-home',this)"><i class="ti ti-flame"></i><span>Inicio</span></button>
+    <button class="nav-btn" onclick="navTo('s-matches',this)"><i class="ti ti-heart"></i><span>Matches</span></button>
+    <button class="nav-btn active" onclick="navTo('s-chat',this)"><i class="ti ti-message-circle"></i><span>Mensajes</span></button>
+    <button class="nav-btn" onclick="navTo('s-map',this)"><i class="ti ti-map"></i><span>Mapa</span></button>
+    <button class="nav-btn" onclick="navTo('s-profile',this)"><i class="ti ti-user"></i><span>Perfil</span></button>
+  </div>
+</div>
+
+<!-- MÓDULO 13: CHAT INDIVIDUAL -->
+<div class="screen" id="s-chatroom">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-chat')"><i class="ti ti-arrow-left"></i></button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="avatar" id="chat-avatar" style="width:36px;height:36px;font-size:20px;background:var(--color-surface2)">👤</div>
+      <div>
+        <div style="font-weight:600;font-size:15px" id="chat-name">Usuario</div>
+        <div style="font-size:12px;color:var(--color-success)">En línea</div>
+      </div>
+    </div>
+    <button class="icon-btn"><i class="ti ti-dots-vertical"></i></button>
+  </div>
+  <div class="body" id="chat-messages" style="display:flex;flex-direction:column">
+    <!-- Los mensajes se cargarán desde tu base de datos -->
+    <div style="text-align:center;padding:30px 0;color:var(--color-text3);font-size:13px">
+      Es tu primer mensaje con esta persona. ¡Saluda! 👋
+    </div>
+  </div>
+  <div class="chat-input-bar">
+    <input type="text" id="msg-input" placeholder="Escribe un mensaje...">
+    <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send"></i></button>
+  </div>
+</div>
+
+<!-- MÓDULO 14: PERFIL PROPIO -->
+<div class="screen" id="s-profile">
+  <div class="topbar">
+    <div style="width:40px"></div>
+    <h2>Mi perfil</h2>
+    <button class="icon-btn" onclick="go('s-settings')"><i class="ti ti-settings"></i></button>
+  </div>
+  <div class="body">
+    <div class="profile-hero">
+      <div class="big-avatar" id="profile-avatar">👤</div>
+      <div style="font-size:22px;font-weight:700" id="profile-name">Tu nombre</div>
+      <div style="font-size:14px;color:var(--color-text2);margin-top:3px" id="profile-city">Tu ciudad</div>
+      <button class="btn btn-outline" style="width:auto;padding:9px 22px;margin-top:12px" onclick="go('s-reg-personal')">
+        <i class="ti ti-edit"></i> Editar perfil
+      </button>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="num" id="stat-likes">0</div><div class="lbl">Likes recibidos</div></div>
+      <div class="stat-box"><div class="num" id="stat-matches">0</div><div class="lbl">Matches</div></div>
+      <div class="stat-box"><div class="num" id="stat-chats">0</div><div class="lbl">Chats activos</div></div>
+    </div>
+    <p class="section-title">Sobre mí</p>
+    <div class="card">
+      <p style="font-size:14px;color:var(--color-text2);line-height:1.7" id="profile-bio">Completa tu perfil para que otros usuarios puedan conocerte mejor.</p>
+    </div>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="go('s-premium')">
+      <i class="ti ti-crown"></i> Ver planes Premium
+    </button>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="navTo('s-home',this)"><i class="ti ti-flame"></i><span>Inicio</span></button>
+    <button class="nav-btn" onclick="navTo('s-matches',this)"><i class="ti ti-heart"></i><span>Matches</span></button>
+    <button class="nav-btn" onclick="navTo('s-chat',this)"><i class="ti ti-message-circle"></i><span>Mensajes</span></button>
+    <button class="nav-btn" onclick="navTo('s-map',this)"><i class="ti ti-map"></i><span>Mapa</span></button>
+    <button class="nav-btn active" onclick="navTo('s-profile',this)"><i class="ti ti-user"></i><span>Perfil</span></button>
+  </div>
+</div>
+
+<!-- MÓDULO 15: NOTIFICACIONES -->
+<div class="screen" id="s-notifications">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-home')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Notificaciones</h2>
+    <button class="icon-btn"><i class="ti ti-checks"></i></button>
+  </div>
+  <div class="body">
+    <div id="notif-list">
+      <!-- Se llenará desde tu base de datos -->
+    </div>
+    <div class="empty-state" id="notif-empty">
+      <i class="ti ti-bell"></i>
+      <h3>Sin notificaciones</h3>
+      <p>Aquí verás likes, matches<br>y mensajes nuevos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MÓDULO 16: FILTROS -->
+<div class="screen" id="s-filters">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-home')"><i class="ti ti-x"></i></button>
+    <h2>Filtros de búsqueda</h2>
+    <button style="background:none;border:none;color:var(--color-primary);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font)" onclick="go('s-home')">Aplicar</button>
+  </div>
+  <div class="body">
+    <p class="section-title">Rango de edad</p>
+    <div class="filter-range">
+      <label><span>Edad mínima</span><span style="color:var(--color-text);font-weight:700" id="age-min-val">18</span> años</label>
+      <input type="range" min="18" max="60" value="18" step="1" oninput="document.getElementById('age-min-val').textContent=this.value">
+    </div>
+    <div class="filter-range">
+      <label><span>Edad máxima</span><span style="color:var(--color-text);font-weight:700" id="age-max-val">35</span> años</label>
+      <input type="range" min="18" max="60" value="35" step="1" oninput="document.getElementById('age-max-val').textContent=this.value">
+    </div>
+    <p class="section-title">Distancia máxima</p>
+    <div class="filter-range">
+      <label><span>Distancia</span><span style="color:var(--color-text);font-weight:700" id="dist-val">25</span> km</label>
+      <input type="range" min="1" max="200" value="25" step="1" oninput="document.getElementById('dist-val').textContent=this.value">
+    </div>
+    <p class="section-title">Me interesa conocer</p>
+    <div class="chip-group">
+      <span class="chip selected" onclick="toggleChip(this)">Mujeres</span>
+      <span class="chip" onclick="toggleChip(this)">Hombres</span>
+      <span class="chip" onclick="toggleChip(this)">Todos</span>
+    </div>
+    <p class="section-title">Nivel educativo</p>
+    <div class="chip-group">
+      <span class="chip" onclick="toggleChip(this)">Secundaria</span>
+      <span class="chip" onclick="toggleChip(this)">Universitario</span>
+      <span class="chip selected" onclick="toggleChip(this)">Cualquiera</span>
+    </div>
+    <p class="section-title">Propósito</p>
+    <div class="chip-group">
+      <span class="chip selected" onclick="toggleChip(this)">Relación seria</span>
+      <span class="chip" onclick="toggleChip(this)">Amistad</span>
+      <span class="chip" onclick="toggleChip(this)">Casual</span>
+    </div>
+    <button class="btn btn-primary" onclick="go('s-home')">Aplicar filtros</button>
+    <button class="btn btn-outline">Restablecer todo</button>
+  </div>
+</div>
+
+<!-- MÓDULO 17: MAPA -->
+<div class="screen" id="s-map">
+  <div class="topbar">
+    <div style="width:40px"></div>
+    <h2>Personas cercanas</h2>
+    <button class="icon-btn" onclick="go('s-filters')"><i class="ti ti-adjustments-horizontal"></i></button>
+  </div>
+  <div class="body">
+    <div class="map-placeholder">
+      <i class="ti ti-map-2" style="font-size:44px"></i>
+      <p style="font-size:15px;font-weight:600">Mapa interactivo</p>
+      <p style="font-size:12px;color:var(--color-text3)">Conecta Google Maps o Leaflet.js aquí</p>
+    </div>
+    <p class="section-title">Cerca de ti</p>
+    <div id="nearby-list">
+      <!-- Se llenará desde tu base de datos con usuarios reales -->
+    </div>
+    <div class="empty-state" id="nearby-empty">
+      <i class="ti ti-map-pin"></i>
+      <h3>Nadie cerca aún</h3>
+      <p>Cuando otros usuarios estén cerca,<br>aparecerán aquí.</p>
+    </div>
+  </div>
+  <div class="bottomnav">
+    <button class="nav-btn" onclick="navTo('s-home',this)"><i class="ti ti-flame"></i><span>Inicio</span></button>
+    <button class="nav-btn" onclick="navTo('s-matches',this)"><i class="ti ti-heart"></i><span>Matches</span></button>
+    <button class="nav-btn" onclick="navTo('s-chat',this)"><i class="ti ti-message-circle"></i><span>Mensajes</span></button>
+    <button class="nav-btn active" onclick="navTo('s-map',this)"><i class="ti ti-map"></i><span>Mapa</span></button>
+    <button class="nav-btn" onclick="navTo('s-profile',this)"><i class="ti ti-user"></i><span>Perfil</span></button>
+  </div>
+</div>
+
+<!-- MÓDULO 18: PREMIUM -->
+<div class="screen" id="s-premium">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-profile')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Only Love Premium</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <div class="premium-card">
+      <i class="ti ti-crown" style="font-size:40px;margin-bottom:10px"></i>
+      <h3 style="font-size:22px;font-weight:700;margin-bottom:8px">Desbloquea todo</h3>
+      <p style="font-size:13px;opacity:0.88;margin-bottom:18px;line-height:1.6">Ve quién te dio like, likes ilimitados, super likes y mucho más.</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:5px 14px;font-size:12px">Likes ilimitados</span>
+        <span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:5px 14px;font-size:12px">Ver quién te gustó</span>
+        <span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:5px 14px;font-size:12px">Sin anuncios</span>
+      </div>
+    </div>
+    <p class="section-title">Elige tu plan</p>
+    <div class="plan-row">
+      <div class="plan-box selected" onclick="selectPlan(this)">
+        <div style="font-size:11px;color:var(--color-primary);font-weight:700;margin-bottom:6px">MÁS POPULAR</div>
+        <div class="price">$9.99</div>
+        <div class="period">por mes</div>
+      </div>
+      <div class="plan-box" onclick="selectPlan(this)">
+        <div style="font-size:11px;color:var(--color-success);font-weight:700;margin-bottom:6px">AHORRA 40%</div>
+        <div class="price">$5.99</div>
+        <div class="period">por mes · anual</div>
+      </div>
+    </div>
+    <button class="btn btn-primary">Empezar prueba gratis 7 días</button>
+    <button class="btn btn-outline">Ver comparativa de planes</button>
+    <p style="text-align:center;font-size:11px;color:var(--color-text3);margin-top:10px;line-height:1.7">Cancela cuando quieras. Sin compromiso.</p>
+  </div>
+</div>
+
+<!-- MÓDULO 19: SETTINGS -->
+<div class="screen" id="s-settings">
+  <div class="topbar">
+    <button class="icon-btn" onclick="go('s-profile')"><i class="ti ti-arrow-left"></i></button>
+    <h2>Configuración</h2>
+    <div style="width:40px"></div>
+  </div>
+  <div class="body">
+    <p class="section-title">Cuenta</p>
+    <div class="setting-item" onclick="go('s-reg-personal')">
+      <div><div class="setting-label">Editar perfil</div><div class="setting-sub">Foto, nombre, descripción</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <div class="setting-item" onclick="go('s-recover')">
+      <div><div class="setting-label">Cambiar contraseña</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <div class="setting-item" onclick="go('s-notifications')">
+      <div><div class="setting-label">Notificaciones</div><div class="setting-sub">Push, email, SMS</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <p class="section-title">Privacidad</p>
+    <div class="setting-item">
+      <div><div class="setting-label">Mostrar distancia</div><div class="setting-sub">Visible en tu perfil</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label">Mostrar edad</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label">Modo incógnito</div><div class="setting-sub">Solo ves perfiles, no te ven</div></div>
+      <div class="toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <p class="section-title">Preferencias</p>
+    <div class="setting-item">
+      <div><div class="setting-label">Notificaciones push</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label">Sonidos</div></div>
+      <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label">Idioma</div><div class="setting-sub">Español</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <p class="section-title">Soporte</p>
+    <div class="setting-item">
+      <div><div class="setting-label">Ayuda y soporte</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label">Reportar un problema</div></div>
+      <i class="ti ti-chevron-right" style="color:var(--color-text3)"></i>
+    </div>
+    <p class="section-title">Sesión</p>
+    <div class="setting-item" onclick="go('s-splash')">
+      <div><div class="setting-label" style="color:var(--color-primary)">Cerrar sesión</div></div>
+      <i class="ti ti-logout" style="color:var(--color-primary)"></i>
+    </div>
+    <div class="setting-item">
+      <div><div class="setting-label" style="color:#A32D2D">Eliminar cuenta</div></div>
+      <i class="ti ti-trash" style="color:#A32D2D"></i>
+    </div>
+  </div>
+</div>
+
+<!-- VISOR DE STORIES -->
+<div class="story-viewer" id="story-viewer">
+  <div class="story-viewer-top">
+    <button onclick="closeStory()"><i class="ti ti-x"></i></button>
+    <div style="flex:1;background:rgba(255,255,255,0.25);height:3px;border-radius:2px;margin:0 10px">
+      <div id="story-progress" style="height:100%;background:#fff;width:0%;border-radius:2px;transition:width 3s linear"></div>
+    </div>
+    <span id="story-viewer-name" style="color:#fff;font-size:14px;font-weight:600"></span>
+  </div>
+  <div class="story-content" id="story-content"></div>
+  <div style="padding:20px;color:rgba(255,255,255,0.88);font-size:14px;text-align:center" id="story-msg"></div>
+</div>
+
+<script>
+  /* ============================================================
+     NAVEGACIÓN
+     go('id')      → va a esa pantalla
+     navTo('id', btn) → va y resalta el botón del nav inferior
+  ============================================================ */
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const t = document.getElementById(id);
+    if (t) { t.classList.add('active'); t.scrollTop = 0; }
+  }
+
+  function navTo(id, btn) {
+    go(id);
+    document.querySelectorAll('.bottomnav .nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.bottomnav .nav-btn').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(id)) b.classList.add('active');
+    });
+  }
+
+  /* ============================================================
+     UTILIDADES DE FORMULARIO
+  ============================================================ */
+  function toggleChip(el) { el.classList.toggle('selected'); }
+  function selectPlan(el) {
+    document.querySelectorAll('.plan-box').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function showRecoverSuccess() {
+    document.getElementById('recover-ok').style.display = 'block';
+  }
+
+  /* ============================================================
+     VERIFICACIÓN DE CORREO ELECTRÓNICO — CONECTADO A BACKEND REAL
+     Cambia BACKEND_URL por la URL donde despliegues tu backend
+     (ej: http://localhost:3000 en local, o tu dominio en producción).
+  ============================================================ */
+  const BACKEND_URL = 'http://localhost:3000';
+  let currentVerifyEmail = '';
+  let verifyBtnTimer = null;
+
+  function setVerifyLoading(loading, btnSelector) {
+    const btn = document.querySelector(btnSelector);
+    if (!btn) return;
+    btn.disabled = loading;
+    btn.dataset.original = btn.dataset.original || btn.textContent;
+    btn.textContent = loading ? 'Enviando...' : btn.dataset.original;
+  }
+
+  async function goToVerifyEmail() {
+    const emailInput = document.querySelector('#s-register input[type="email"]');
+    const email = emailInput && emailInput.value.trim() ? emailInput.value.trim() : '';
+
+    if (!email) {
+      alert('Ingresa un correo electrónico válido antes de continuar.');
+      return;
+    }
+
+    currentVerifyEmail = email;
+    document.getElementById('verify-email-target').textContent = email;
+    document.getElementById('verify-email-error').style.display = 'none';
+    document.getElementById('verify-resend-msg').style.display = 'none';
+    document.getElementById('verify-ok').style.display = 'none';
+    document.querySelectorAll('#s-verify-email .otp-digit').forEach(d => d.value = '');
+    go('s-verify-email');
+
+    await sendVerificationCode(email);
+
+    setTimeout(() => {
+      const first = document.querySelector('#s-verify-email .otp-digit');
+      if (first) first.focus();
+    }, 50);
+  }
+
+  async function sendVerificationCode(email) {
+    const errorEl = document.getElementById('verify-email-error');
+    try {
+      const resp = await fetch(`${BACKEND_URL}/api/send-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok) {
+        errorEl.textContent = data.error || 'No se pudo enviar el código. Intenta de nuevo.';
+        errorEl.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('Error de red al enviar código:', err);
+      errorEl.textContent = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+      errorEl.style.display = 'block';
+    }
+  }
+
+  async function confirmEmailCode() {
+    const digits = Array.from(document.querySelectorAll('#s-verify-email .otp-digit')).map(d => d.value.trim());
+    const code = digits.join('');
+    const errorEl = document.getElementById('verify-email-error');
+
+    if (code.length < 6) {
+      errorEl.textContent = 'Por favor completa los 6 dígitos del código.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${BACKEND_URL}/api/verify-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentVerifyEmail, code }),
+      });
+      const data = await resp.json();
+
+      if (data.valid) {
+        errorEl.style.display = 'none';
+        document.getElementById('verify-ok').style.display = 'block';
+        setTimeout(() => go('s-reg-personal'), 900);
+      } else {
+        errorEl.textContent = data.error || 'Código incorrecto. Inténtalo de nuevo.';
+        errorEl.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('Error de red al verificar código:', err);
+      errorEl.textContent = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+      errorEl.style.display = 'block';
+    }
+  }
+
+  async function resendEmailCode() {
+    document.querySelectorAll('#s-verify-email .otp-digit').forEach(d => d.value = '');
+    document.getElementById('verify-email-error').style.display = 'none';
+    document.getElementById('verify-resend-msg').style.display = 'none';
+
+    await sendVerificationCode(currentVerifyEmail);
+
+    document.getElementById('verify-resend-msg').style.display = 'block';
+    const first = document.querySelector('#s-verify-email .otp-digit');
+    if (first) first.focus();
+  }
+
+  // Auto-avance entre los campos del código de verificación
+  document.querySelectorAll('#s-verify-email .otp-digit').forEach((input, idx, all) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 1);
+      if (input.value && idx < all.length - 1) all[idx + 1].focus();
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) all[idx - 1].focus();
+    });
+  });
+
+  /* ============================================================
+     CHAT — enviar mensaje
+     TODO: Conecta esto a tu backend (WebSocket, Firebase, etc.)
+  ============================================================ */
+  function openChatWith(name, avatar) {
+    document.getElementById('chat-name').textContent = name;
+    document.getElementById('chat-avatar').textContent = avatar || '👤';
+    // Limpiar mensajes anteriores y mostrar inicio de conversación
+    const msgs = document.getElementById('chat-messages');
+    msgs.innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--color-text3);font-size:13px">Inicio de la conversación con ' + name + ' 💬</div>';
+    go('s-chatroom');
+  }
+
+  function sendMsg() {
+    const inp = document.getElementById('msg-input');
+    const text = inp.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chat-messages');
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble sent';
+    bubble.textContent = text;
+    msgs.appendChild(bubble);
+    msgs.scrollTop = msgs.scrollHeight;
+    inp.value = '';
+    // TODO: Aquí conectas con tu backend para enviar el mensaje real
+    // Ejemplo: socket.emit('message', { to: currentChatUser, text: text });
+  }
+
+  document.getElementById('msg-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMsg();
+  });
+
+  /* ============================================================
+     STORIES — visor
+     TODO: Carga las stories desde tu base de datos
+     y llama a openStory(nombre, contenido) dinámicamente
+  ============================================================ */
+  let storyTimer = null;
+
+  function openStory(name, content, bg) {
+    const viewer = document.getElementById('story-viewer');
+    document.getElementById('story-content').textContent = content || '';
+    document.getElementById('story-content').style.background = bg || '#222';
+    document.getElementById('story-viewer-name').textContent = name;
+    document.getElementById('story-msg').textContent = 'Historia de ' + name;
+    document.getElementById('story-progress').style.width = '0%';
+    viewer.classList.add('show');
+    clearTimeout(storyTimer);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.getElementById('story-progress').style.width = '100%';
+    }));
+    storyTimer = setTimeout(closeStory, 3100);
+  }
+
+  function closeStory() {
+    document.getElementById('story-viewer').classList.remove('show');
+    clearTimeout(storyTimer);
+  }
+
+  /* ============================================================
+     SWIPE — función de deslizar
+     TODO: Conecta esto a tu API para registrar likes/dislikes
+     y cargar perfiles reales desde tu base de datos
+
+     Ejemplo de cómo cargar un perfil real:
+     function loadProfile(user) {
+       const container = document.getElementById('swipe-cards');
+       container.innerHTML = `
+         <div class="swipe-card">
+           <div class="swipe-photo">
+             <img src="${user.foto}" style="width:100%;height:100%;object-fit:cover">
+           </div>
+           <div class="swipe-info">
+             <div style="font-size:22px;font-weight:700">${user.nombre}, ${user.edad}</div>
+             <p>${user.bio}</p>
+           </div>
+         </div>
+         <div class="swipe-actions">
+           <button class="action-btn" onclick="doSwipe('dislike')">...</button>
+           <button class="action-btn" onclick="doSwipe('like')">...</button>
+         </div>`;
+     }
+  ============================================================ */
+  function doSwipe(dir) {
+    // TODO: Registra el like/dislike en tu backend
+    // Luego carga el siguiente perfil real
+    console.log('Swipe:', dir);
+  }
+
+  /* ============================================================
+     INICIALIZACIÓN
+     Aquí puedes cargar datos reales al iniciar la app
+     TODO: Reemplaza con llamadas a tu API o Firebase
+  ============================================================ */
+  function initApp() {
+    // Ejemplo de cómo cargarías datos reales:
+    // fetch('/api/profiles').then(r => r.json()).then(profiles => { ... });
+    // fetch('/api/matches').then(r => r.json()).then(matches => { ... });
+    // fetch('/api/notifications').then(r => r.json()).then(notifs => { ... });
+    console.log('Only Love lista. Conecta tu backend aquí.');
+  }
+
+  initApp();
+</script>
+
+</div>
+</body>
+</html>
